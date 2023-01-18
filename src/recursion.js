@@ -86,6 +86,21 @@ var range = function(x, y) {
 // exponent(4,3); // 64
 // https://www.khanacademy.org/computing/computer-science/algorithms/recursive-algorithms/a/computing-powers-of-a-number
 var exponent = function(base, exp) {
+  if (exp < 0) {
+    return 1 / (exponent(base, -exp));
+  }
+  if (exp === 0) {
+    return 1;
+  }
+  if (exp === 1) {
+    return base;
+  }
+  if (exp % 2 === 0) {
+    // return exponent(exponent(base, exp/2), 2);
+    var result = exponent(base, exp/2);
+    return result * result;
+  }
+  return base * exponent(base, exp - 1);
 };
 
 // 8. Determine if a number is a power of two.
@@ -93,14 +108,45 @@ var exponent = function(base, exp) {
 // powerOfTwo(16); // true
 // powerOfTwo(10); // false
 var powerOfTwo = function(n) {
+  if (n === 0) {
+    return false;
+  }
+  if (n === 1) {
+    return true;
+  }
+  if (n === 2) {
+    return true;
+  }
+  if (n % 2 === 0) {
+    return (powerOfTwo(n / 2));
+  }
+  return false;
+
 };
 
 // 9. Write a function that reverses a string.
 var reverse = function(string) {
+  var length = string.length;
+  if (length <= 1) {
+    return string;
+  }
+  return reverse(string.slice(Math.floor(length/2))) + reverse(string.slice(0, Math.floor(length/2)));
+  // thought maybe I'd be clever and use divide and conquer approach, but both methods are O(n).
+  // seems like there would still be a benefit for memory/call stack though?
 };
 
 // 10. Write a function that determines if a string is a palindrome.
 var palindrome = function(string) {
+  // return reverse(string).toLowerCase() === string.toLowerCase(); non-recursive method
+  string = string.split(' ').join('').toLowerCase();
+  var length = string.length;
+  if (length <= 1) {
+    return true;
+  }
+  if (string[0] !== string[length - 1]) {
+    return false;
+  }
+  return palindrome(string.slice(1, -1));
 };
 
 // 11. Write a function that returns the remainder of x divided by y without using the
@@ -182,11 +228,50 @@ var countKeysInObj = function(obj, key) {
 // countValuesInObj(obj, 'r') // 2
 // countValuesInObj(obj, 'e') // 1
 var countValuesInObj = function(obj, value) {
+  // Use reduce to iterate through each object and increment counter
+    // base case: if currentValue isn't an object
+      // then if currentValue === value
+        // return counter + 1
+      // return count
+    // recursive case: if currentValue is an object
+      // return countValuesInObj(currentValue)
+  // return counter
+
+  var countCurrentObj = function(currentCount, currentValue) {
+    if (typeof currentValue !== 'object') {
+      if (currentValue === value) {
+        return currentCount + 1;
+      }
+      return currentCount;
+    }
+    return currentCount + countValuesInObj(Object.values(currentValue), value);
+  }
+  return Object.values(obj).reduce(countCurrentObj, 0);
+
 };
 
 // 24. Find all keys in an object (and nested objects) by a provided name and rename
 // them to a provided new name while preserving the value stored at that key.
 var replaceKeysInObj = function(obj, oldKey, newKey) {
+
+  // if current key exists,
+    // add newkey with value of oldKey
+    // delete oldKey
+  // iterate through keys
+    // if recursive case: (current value is an object)
+      // current value = replaceKeysInObj(current value, oldKey, newKey)
+  // return obj
+
+  if (obj[oldKey] !== undefined) {
+    obj[newKey] = obj[oldKey];
+    delete obj[oldKey];
+  }
+  for (let i in obj) {
+    if (typeof obj[i] === 'object') {
+      obj[i] = replaceKeysInObj(obj[i], oldKey, newKey);
+    }
+  }
+  return obj;
 };
 
 // 25. Get the first n Fibonacci numbers. In the Fibonacci sequence, each subsequent
